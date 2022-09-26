@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="Description" content="User-Authentication-IndexedDb">
+  <title>User-authentication-IndexedDB</title>
+</head>
+<body>
+  <h2>User-Authentication-IndexedDb</h2>
+  <div class="login">
+    <form action="#">
+      <h1>Registration Page</h1>
+
+      <div>
+      <label for="Name">Name:</label>
+      <input type="Name" name="Name" id="Name" placeholder="enter your Name">
+    </div>
+    <div>
+        <label for="age">Age:</label>
+        <input type="age" name="age" id="age" placeholder="enter your age">
+      </div>
+      <div>
+        <label for="designation">Designation:</label>
+        <input type="designation" name="designation" id="designation" placeholder="enter your designation">
+      </div>
+      <div>
+        <label for="Company">Company:</label>
+        <input type="Company" name="Company" id="Company" placeholder="enter your Company">
+      </div>
+      <div>
+        <label for="Address">Address:</label>
+        <input type="Address" name="Address" id="Address" placeholder="enter your Address">
+      </div>
+    <div>
+        <label for="email">Email:</label>
+        <input type="email" name="email" id="email" placeholder="enter your mail">
+      </div>
+    <div>
+      <label for="password">Password:</label>
+      <input type="password" name="password" id="password" placeholder="enter your password">
+    </div>
+    <div>
+        <label for="Phonenumber">Phonenumber:</label>
+        <input type="Phonenumber" name="Phonenumber" id="Phonenumber" placeholder="enter your Phonenumber">
+      </div>
+    <div>
+      <input type="submit" ide="btn" value="register" onclick="store()">
+    </div>
+    </form>
+  </div>
+
+  <hr>
+  <div class="login">
+    <form action="#">
+      <h1>Sign-in</h1>
+      <div>
+      <label for="login-email">Email:</label>
+      <input type="email" name="login-email" id="login-email" placeholder="enter your email">
+    </div>
+    <div>
+      <label for="login-password">Password:</label>
+      <input type="password" name="login-password" id="login-password" placeholder="enter your password">
+    </div>
+    <div>
+      <input type="submit" value="Sign-in" onclick="check()">
+    </div>
+    </form>
+</div>
+
+  <div>
+    <h3> Welcome to the profile</h3>
+    <button id="btn">Logout</button>
+  </div>
+  <script>
+    
+    (function () {
+        // Compatibility
+        if (!window.indexedDB) {
+          alert("Your browser not supporting indexedDB");
+          return;
+        }
+    
+     // Open a database
+   // open("databaseName", "version")  // open() => IDBOpenDBRequest
+      const request = indexedDB.open("Users", 1);
+        console.log(request);
+
+
+    function store(){
+      const email = document.querySelector("#email").value;
+      const password = document.querySelector("#password").value;
+      insertUser(db, {
+              Name: "John", 
+              Age:26,
+              Designation: "Full Stack Developer",
+              Company: "ABC",
+              Address: "123XYZ",
+              email: "john@skillsafari.in",
+              password: "123456",
+              Phoneno: "123456789",
+            });
+    }
+
+    insertUser(db,{
+        Name:"Jack",
+        Age:27,
+        Designation:"Tester",
+    })
+    function check(){
+      const email = document.querySelector("#login-email").value;
+      const password = document.querySelector("#login-password").value;
+      const btn = document.querySelector("#btn").value;
+    }
+    btn.addEventListener("click", (e) => {
+       btn.logout();
+    })
+
+    request.onupgradeneeded = (e) => {
+          let db = e.target.result;
+
+          // Create the Users object store
+          let store = db.createObjectStore("userDetails", {
+            autoIncrement: true,
+          });
+
+          // Create a index - email - Unique value
+          let index = store.createIndex("email", "email", {
+            unique: true,
+          });
+        };
+
+        request.onerror = (e) => {
+          console.log(`Database error: ${e.target.error}`);
+        };
+
+        request.onsuccess = (e) => {
+          const db = e.target.result;
+          // Insert User in the IndexedDB
+          function insertUser(db, userObj) {
+            // create a new transaction
+            // db.transaction("objectStore", "accessModePermission")
+            const txn = db.transaction("userDetails", "readwrite");
+            // get the object store - userDetails
+            const store = txn.objectStore("userDetails");
+            // execute a query => return onsuccess, onerror
+            let query = store.put(userObj);
+
+            // onsuccess
+            query.onsuccess = function (e) {
+              console.log(e.target.result);
+            };
+            // onerror
+            query.onerror = function (e) {
+              console.log(e.target.error);
+            };
+
+            txn.oncomplete = function () {
+              db.close();
+            };
+          }
+
+         
+          // Read a data
+          function getUserById(db, id) {
+            const txn = db.transaction("userDetails", "readwrite");
+            const store = txn.objectStore("userDetails");
+            const query = store.get(id);
+
+            query.onsuccess = function (e) {
+              if (!e.target.result) {
+                console.log(`The user with the ID: ${id} not found`);
+              } else {
+                console.log(e.target.result);
+              }
+            };
+
+            query.onerror = function (e) {
+              console.log(e.target.error);
+            };
+
+            txn.oncomplete = function () {
+              db.close();
+            };
+          }
+  </script>
+</body>
+</html>
